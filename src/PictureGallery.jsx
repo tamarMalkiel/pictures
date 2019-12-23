@@ -5,7 +5,8 @@ export default class PictureGallery extends React.Component {
     state = {
         images: [],
         search: "",
-        grayscale: "No"
+        grayscale: false,
+        error: false
     }
 
     componentDidMount() {
@@ -16,42 +17,69 @@ export default class PictureGallery extends React.Component {
     getImages = () => {
         fetch(`https://picsum.photos/v2/list?page=${page}&limit=30`).then(res => {
             res.json().then(images => {
-                this.setState({ images });
+                this.setState({ images, error: false });
                 page = page < 10 ? page + 1 : 0;
-                console.log('images', images);
             }).catch(err => {
-                console.log('error', err);
+                this.setState({ error: true })
             })
         }).catch(err => {
-            console.log('error', err);
+            this.setState({ error: true })
+
         })
+    }
+
+    handleChangeSearch = (e) => {
+        this.setState({ search: e.target.value });
+    }
+
+    onGrayscale = (e) => {
+        this.setState({ grayscale: e.target.value === "Grayscale" ? true : false });
     }
 
     renderImage = (image) => {
         return <div key={image.id} className={"image-container"}>
-            <img src={`https://picsum.photos/id/${image.id}/300/300${this.state.grayscale === "Yes"?"?grayscale":""}` } height={300} width={300} />
-            <b>{image.author}</b>
+            <img src={`https://picsum.photos/id/${image.id}/300/300${this.state.grayscale ? "?grayscale" : ""}`} height={300} width={300} />
+            <div><b>{image.author}</b></div>
         </div>
     }
 
-    handleChangeSearch = (e) => {
-        this.setState({search: e.target.value});
-    }
+    renderAction = () => {
+        return (
+            <div className={"actions"}>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class={`btn btn-secondary ${this.state.grayscale ? "active" : ""}`}>
+                        <input value={"Grayscale"} name={"grayscale"} onChange={this.onGrayscale} type="radio" checked={this.state.grayscale} /> Grayscale
+                    </label>
+                    <label class={`btn btn-secondary ${!this.state.grayscale ? "active" : ""}`}>
+                        <input value={"Normal"} name={"grayscale"} onChange={this.onGrayscale} type="radio" checked={
+                            !this.state.grayscale} />  Normal
+                    </label>
+                </div>
+                <button className={"btn btn-secondary"} onClick={this.getImages}>Next Page</button>
 
-    onGrayscale = (e) =>{
-        this.setState({grayscale: e.target.value});
+            </div>
+        )
     }
 
     render() {
+        if (this.state.error) {
+            return <div>
+                Error occured
+            </div>
+        }
         return (
             <div>
-                grayscale: <br/>
-                <input value={"Yes"} name={"grayscale"} onChange={this.onGrayscale} type="radio" checked={this.state.grayscale === "Yes"} /> Yes 
-                <input value={"No"} name={"grayscale"} onChange={this.onGrayscale} type="radio" checked={this.state.grayscale === "No"} />  No
+                {this.renderAction()}
+                <div className={"images-container"}>
+                    <div class="input-group input-group-sm mb-3 my-input">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-sm">Search</span>
 
-                <button onClick={this.getImages}>Next Page</button>
-                <input value={this.state.search} onChange={(e) => this.handleChangeSearch(e)} />
-                {this.state.images.filter(item=> !item.author.search(this.state.search)).map(this.renderImage)}
+                            <input class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.search} onChange={(e) => this.handleChangeSearch(e)} />
+                        </div>
+                    </div>
+                    {this.state.images.filter(item => !item.author.search(this.state.search)).map(this.renderImage)}
+                </div>
             </div>
         )
     }

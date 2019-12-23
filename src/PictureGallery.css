@@ -1,4 +1,30 @@
 .image-container {
+    margin: 5px;
+    float: left;
+}
+.images-container {
+    padding-top: 65px;
+}
+.actions {
     display: flex;
-    flex-direction: column;
+    position: absolute;
+    width: 98%;
+    height: 61px;
+    justify-content: space-between;
+    background-color: black;
+    padding: 12px 20px;
+}
+
+.actions-container {
+    display: flex;
+}
+
+.header {
+    color: white;
+    margin-bottom: 0px;
+    line-height: 1.8;
+}
+
+.my-input {
+    width: auto !important;
 }
